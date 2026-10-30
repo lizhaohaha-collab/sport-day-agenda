@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>運動會賽程・計分・關卡手冊</title>
+<style>
+:root{--bg:#FBF9F5;--card:#fff;--tx:#1E3A2F;--mu:#6b7a72;--ac:#B08A3E;--ln:#e5dfd3;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14201a;--card:#1c2b23;--tx:#eee8da;--mu:#9fb0a6;--ac:#d4af62;--ln:#2f4338;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#14201a;--card:#1c2b23;--tx:#eee8da;--mu:#9fb0a6;--ac:#d4af62;--ln:#2f4338;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.6 -apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif}
+main{max-width:760px;margin:0 auto;padding:16px}
+h1{font-size:20px;margin:4px 0 2px}.sub{color:var(--mu);font-size:13px;margin-bottom:12px}
+nav{display:flex;gap:6px;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);padding:8px 0;z-index:5}
+nav button{flex:1;padding:9px 4px;border:1px solid var(--ln);background:var(--card);color:var(--tx);border-radius:10px;font:inherit;font-weight:600}
+nav button.on{background:var(--tx);color:var(--bg)}
+.card{background:var(--card);border:1px solid var(--ln);border-radius:12px;padding:12px 14px;margin:10px 0}
+.t{color:var(--ac);font-weight:700;font-size:13px}
+.sc{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:460px}
+th,td{padding:6px 4px;border-bottom:1px solid var(--ln);text-align:center;font-size:14px}
+td:first-child,th:first-child{text-align:left}
+input{width:100%;min-width:48px;padding:7px 4px;border:1px solid var(--ln);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit;text-align:center}
+th input{font-weight:700}
+.rank{display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--ln)}
+.rank b{width:28px;color:var(--ac);font-size:18px}.rank span{flex:1;font-weight:600}.rank em{font-style:normal;font-size:20px;font-weight:700}
+details{border:1px solid var(--ln);border-radius:12px;background:var(--card);margin:8px 0;padding:10px 14px}
+summary{font-weight:700;cursor:pointer}
+details h4{margin:10px 0 2px;color:var(--ac);font-size:13px}
+details ul{margin:2px 0;padding-left:20px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.btn{padding:9px;border:1px solid var(--ln);background:var(--card);color:var(--tx);border-radius:10px;font:inherit}
+.hint{font-size:12px;color:var(--mu)}
+</style>
+</head>
+<body>
+<main>
+<h1>40 人團康運動會</h1>
+<div class="sub">16:00–20:00 ・ 4 隊 × 10 人 ・ 累計積分決勝</div>
+<nav><button data-v="s" class="on">賽程</button><button data-v="b">計分板</button><button data-v="h">關卡手冊</button></nav>
+<section id="s"></section>
+<section id="b" hidden></section>
+<section id="h" hidden></section>
+</main>
+<script>
+var TEAMS=["A 白","B 黑","C 亮","D 灰"];
+var T=[
+["16:00–16:20","集合、分組、破冰遊戲與開場說明","不計分"],
+["16:20–16:35","世界大戰大隊接力（小遊戲）","5 個雙人關卡；完賽名次換 4/3/2/1 分"],
+["16:35–17:15","籃球 4v4（男女分開）","男、女各 4 場；各自名次換分後加總"],
+["17:15–17:45","奪旗大賽","4 場 × 8 分鐘；名次換 4/3/2/1 分"],
+["17:45–18:05","中場休息與場地調整","不計分"],
+["18:05–18:25","巨大排球","4 場 × 8 分鐘；名次換 4/3/2/1 分"],
+["18:25–19:05","飛盤趣味對抗賽","4 場 × 8 分鐘；名次換 4/3/2/1 分"],
+["19:05–19:45","躲避球大賽","4 場 × 8 分鐘；名次換 4/3/2/1 分"],
+["19:45–20:00","總積分結算、頒獎與大合照","不計分"]];
+var BR="4 隊抽籤：第 1 輪 2 場同時進行，勝者爭冠、敗者爭季軍（共 4 場，每場 8 分鐘）。名次：冠軍 4、亞軍 3、季軍 2、殿軍 1 分。";
+var E=[
+{t:"16:20–16:35",n:"世界大戰大隊接力",pt:"依全隊完賽先後排名，名次換 4/3/2/1 分",
+ who:"每隊 10 人，兩兩一組共 5 組雙人搭檔，各組分別挑戰 5 個關卡",eq:"見下方 5 個關卡道具、計時器",
+ set:"5 個關卡一字排開，每關 1 位關主；4 隊同時進行",
+ rules:["每組雙人需完成全部 5 關才算該組完賽","5 組全部完成的先後順序決定名次","時間不足時，以完成關卡數與完賽先後排名","犯規或失誤需重做，不得跳關"],
+ judge:"每關 1 位關主 + 1 位總裁判（共 6 人）",safe:"通道淨空；跑動注意地面；兩人三腳須有人保護"}
+
+,
+{t:"16:35–17:15",n:"籃球 4v4（男女分開）",pt:"男子組與女子組各自名次換 4/3/2/1 分，兩組分數加總後計入團隊總分",
+ who:"男子組 4v4、女子組 4v4 同時進行；每隊各自組男隊與女隊",eq:"籃球 3 顆、半場計分板、計時器",
+ set:"男子與女子各用一個半場，各打 4 場（含冠亞與季軍賽）",
+ rules:["男、女組各自 4 隊抽籤：勝者爭冠、敗者爭季軍，每場 8 分鐘",BR,"一般進球 1 分、三分線外 2 分（可調整）","犯規自行判定，爭議由裁判決定","時間到分數高者勝，同分則罰球決勝"],
+ judge:"每個半場 1 位裁判 + 1 位記分",safe:"先熱身；自帶護具；不衝撞"},
+{t:"17:15–17:45",n:"奪旗大賽",pt:"限時內搶到最多敵方旗幟的隊伍獲勝；名次換 4/3/2/1 分",
+ who:"每隊每場 7 人（4 男 3 女）",eq:"旗幟（每隊數面）、場地中線、計時器",
+ set:"場地分兩半，旗幟置於各隊底線區；2 個場地可同時進行",
+ rules:[BR,"限時內搶到最多敵方旗幟的隊伍獲勝","進攻者被防守者碰到，須回中線重新出發","進攻者不能當防守者（攻守分工固定）","不可抱人、推人、鎖喉，只能輕碰"],
+ judge:"每場地 1 位裁判 + 1 位數旗",safe:"禁止衝撞；地面保持乾燥；注意場邊"},
+{t:"18:05–18:25",n:"巨大排球",pt:"每場分數高者勝；名次換 4/3/2/1 分",
+ who:"每隊每場 10 人全員上場",eq:"巨型充氣排球、籃球框（或指定目標）、計時器、計分板",
+ set:"可開 2 個場地同時進行，兩輪約 16–20 分鐘",
+ rules:[BR,"以歡樂為主，每隊多人同時上場","球落地即原地重新搶球","球碰到籃球框即得 1 分","8 分鐘到，分數高者勝"],
+ judge:"每場地 1 位裁判 + 1 位記分",safe:"勿抓網架；球面注意壓力；保持地面乾燥"},
+{t:"18:25–19:05",n:"飛盤趣味對抗賽",pt:"接盤得分：女生接到 2 分、男生接到 1 分，每場得分高者勝；名次換 4/3/2/1 分",
+ who:"每隊每場 7 人（4 男 3 女）；全隊 10 人須至少上場 1 次",eq:"飛盤 2–3 支、場地標線、計分板、計時器",
+ set:"可開 2 個場地同時進行第 1 輪與第 2 輪，約 16–20 分鐘即可完成",
+ rules:[BR,"持盤者不得移動（可轉軸），3 秒內傳出","傳盤至得分區被隊友接住即得分（依接盤者性別計 1／2 分）","掉盤、被攔截或出界換邊攻守","每場結束輪替上場人員，確保 10 人都上場過","禁止肢體碰撞、不得搶盤"],
+ judge:"每場地 1 位裁判 + 1 位記分",safe:"先熱身；注意傳盤視線；避免近距離用力丟人"},
+{t:"19:05–19:45",n:"躲避球大賽",pt:"場內剩餘人數多者勝；名次換 4/3/2/1 分",
+ who:"每隊每場 10 人上場（外場 1–3 人）",eq:"軟式躲避球 3 顆、場地標線、計時器",
+ set:"外場人員站對方場地外圍；單場地 4 場約 32 分鐘，可開 2 場地縮短",
+ rules:[BR,"標準躲避球規則：被球直接擊中（未彈地）出局","出局者到外場協助攻擊（外場 1–3 人）","禁止打頭，打頭者無效並出局","8 分鐘到，比場內剩餘人數；同數則加賽 1 分鐘"],
+ judge:"1 位主審 + 1 位計時",safe:"使用軟球；不瞄準頭部；場邊保持距離"}
+];
+var S=[
+{n:"關卡 a　匹克球打水",pt:"兩人合作，擊落所有目標後計時結束",eq:"匹克球、球拍、水桶或瓶子目標",
+ set:"目標排列在前方，距離約 2.5 公尺",
+ rules:["一人持拍將匹克球擊落指定水桶／目標區","須擊落所有瓶數才算過關","全部擊落後以秒數少者較快","球落地或沒打中須重打"],tip:"目標加水較穩，避免被風吹倒；準備毛巾"},
+{n:"關卡 b　籃球兩人夾夾樂",pt:"兩人夾球走到終點",eq:"籃球 4 顆、終點標示",
+ set:"起點與終點距離約 8 公尺",
+ rules:["兩人背對背或胸對胸夾著籃球","不可用手扶球","協力側向走到終點，不需往返","球掉落須回起點重來"],tip:"提醒兩人同步慢走；地面保持乾燥"},
+{n:"關卡 c　比手畫腳",pt:"五題猜對即過關",eq:"手機（出題 App 或題庫）、計時器",
+ set:"一個桌子或標示區，關主持手機出題",
+ rules:["手機出題，一人比手畫腳、一人猜題","不可說話或出聲，不可用文字","答對換下一題","累計五題過關"],tip:"事先準備好題庫（約 15 題），避免尷尬題目"},
+{n:"關卡 d　兩人三腳",pt:"兩人綁腳競速到終點",eq:"綁腳帶（每組 1 條）、終點標示",
+ set:"起終點距離約 10 公尺",
+ rules:["兩人內側腳綁在一起","協力向前競速到終點","中途跌倒須從原地重新起跑","到終點解開綁腳即可交棒"],tip:"綁帶不要太緊；關主注意跌倒"},
+{n:"關卡 e　乒乓球彈彈樂",pt:"三個杯子全中才可前往下一關",eq:"乒乓球數顆、塑膠杯 3 個、桌子",
+ set:"杯子排在桌子遠端，球彈桌面入杯",
+ rules:["一人將乒乓球彈入前方杯中（共 3 杯）","全中方可前往下一關","另一人負責撿球與補位","進杯後可移除該杯"],tip:"準備足夠備用球；桌面保持乾燥"}
+];
+var SC=[["大隊接力"],["籃球（男子）"],["籃球（女子）"],["奪旗"],["巨大排球"],["飛盤"],["躲避球"]];
+var K="sportsday-v4";var st={names:TEAMS.slice(),sc:{},d:[0,1,2,3]};
+try{var r=localStorage.getItem(K);if(r)st=JSON.parse(r)}catch(e){}
+function save(){try{localStorage.setItem(K,JSON.stringify(st))}catch(e){}}
+function $(i){return document.getElementById(i)}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function ul(a){return"<ul>"+a.map(function(x){return"<li>"+esc(x)+"</li>"}).join("")+"</ul>"}
+function sched(){
+ var d=st.d,n=st.names,h="<div class='card'><div class='t'>淘汰＋名次賽對戰（抽籤）</div>";
+ h+="<div>第 1 輪：場地 1　"+esc(n[d[0]])+" vs "+esc(n[d[1]])+"　／　場地 2　"+esc(n[d[2]])+" vs "+esc(n[d[3]])+"</div>";
+ h+="<div>第 2 輪：決賽（兩場勝者）／季軍賽（兩場敗者）</div><div class='hint'>"+esc(BR)+"</div><button class='btn' id='dr' style='margin-top:6px'>重新抽籤</button></div>";
+ T.forEach(function(e){h+="<div class='card'><div class='t'>"+e[0]+"</div><b>"+esc(e[1])+"</b><div class='hint'>"+esc(e[2])+"</div></div>"});
+ $("s").innerHTML=h;
+ $("dr").onclick=function(){var a=[0,1,2,3];for(var i=3;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}st.d=a;save();sched()}}
+function board(){
+ var h="<div class='card sc'><table><tr><th>項目</th>";
+ for(var t=0;t<4;t++)h+="<th><input data-t='"+t+"' value='"+esc(st.names[t])+"' aria-label='隊名'></th>";
+ h+="</tr>";
+ SC.forEach(function(e,i){h+="<tr><td>"+esc(e[0])+"</td>";for(var t=0;t<4;t++){var v=(st.sc[i]||[])[t];h+="<td><input type='number' inputmode='decimal' data-e='"+i+"' data-s='"+t+"' value='"+(v==null?"":v)+"'></td>"}h+="</tr>"});
+ h+="<tr id='tot'></tr></table></div><div class='card' id='rk'></div><div class='row'><button class='btn' id='rs'>清除全部分數</button></div><div class='hint' style='margin-top:6px'>輸入各項「換算後」的隊伍得分；資料只存在這支手機的瀏覽器。</div>";
+ $("b").innerHTML=h;tot();
+ $("b").oninput=function(ev){var d=ev.target.dataset;
+  if(d.t!=null){st.names[d.t]=ev.target.value;sched()}
+  else if(d.e!=null){var a=st.sc[d.e]||[null,null,null,null];a[d.s]=ev.target.value===""?null:parseFloat(ev.target.value);st.sc[d.e]=a}
+  save();tot()};
+ $("rs").onclick=function(){if(confirm("確定清除所有分數？")){st.sc={};save();board()}}}
+function tot(){
+ var T=[0,0,0,0];for(var k in st.sc)st.sc[k].forEach(function(v,i){T[i]+=v||0});
+ var h="<td><b>總分</b></td>";T.forEach(function(v){h+="<td><b>"+v+"</b></td>"});$("tot").innerHTML=h;
+ var o=T.map(function(v,i){return{n:st.names[i],v:v}}).sort(function(a,b){return b.v-a.v});
+ $("rk").innerHTML="<div class='t'>即時排名</div>"+o.map(function(x,i){return"<div class='rank'><b>"+(i+1)+"</b><span>"+esc(x.n)+"</span><em>"+x.v+"</em></div>"}).join("")}
+function det(s){return"<details><summary>"+esc(s.n)+"</summary><h4>過關條件</h4>"+esc(s.pt)+"<h4>道具</h4>"+esc(s.eq)+"<h4>場地佈置</h4>"+esc(s.set)+"<h4>規則</h4>"+ul(s.rules)+"<h4>關主小提醒</h4>"+esc(s.tip)+"</details>"}
+function hand(){
+ var h="<div class='hint'>點開每個項目查看流程、規則與道具清單。</div>";
+ E.forEach(function(e,i){h+="<details><summary>"+(i+1)+". "+esc(e.n)+"　"+e.t+"</summary><h4>參與</h4>"+esc(e.who)+"<h4>計分</h4>"+esc(e.pt)+"<h4>道具</h4>"+esc(e.eq)+"<h4>場地佈置</h4>"+esc(e.set)+"<h4>規則</h4>"+ul(e.rules)+"<h4>工作人員</h4>"+esc(e.judge)+"<h4>安全提醒</h4>"+esc(e.safe)+"</details>";
+  if(i==0){h+="<div class='t' style='margin:10px 0 0'>↳ 小遊戲 5 個關卡</div>"+S.map(det).join("")}});
+ $("h").innerHTML=h}
+document.querySelector("nav").onclick=function(ev){var v=ev.target.dataset.v;if(!v)return;
+ ["s","b","h"].forEach(function(i){$(i).hidden=i!=v});
+ [].forEach.call(document.querySelectorAll("nav button"),function(b){b.className=b.dataset.v==v?"on":""});scrollTo(0,0)};
+sched();board();hand();
+</script>
+</body>
+</html>
